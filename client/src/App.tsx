@@ -11,11 +11,13 @@ const base = location.hostname === 'faisalmuzaffar.github.io' ? '/ImageExtractor
 function Router() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Switch base={base}>
-        <Route path="/" component={Home} />
-        <Route component={NotFound} />
-      </Switch>
-      <Toaster />
+      <div className="app-container">
+        <Switch base={base}>
+          <Route path="/" component={Home} />
+          <Route component={NotFound} />
+        </Switch>
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }

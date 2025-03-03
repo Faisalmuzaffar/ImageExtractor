@@ -6,6 +6,14 @@
     <title>Image Template Extractor</title>
     <meta name="description" content="Extract design elements from images using AI" />
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <script>
+      // Handle base URL for GitHub Pages
+      window.process = {
+        env: {
+          BASE_URL: location.hostname === 'faisalmuzaffar.github.io' ? '/ImageExtractor/' : '/'
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
