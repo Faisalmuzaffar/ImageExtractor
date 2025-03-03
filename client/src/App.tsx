@@ -6,24 +6,18 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 
 // Get the base path for GitHub Pages
-const base = import.meta.env.MODE === 'production' ? '/ImageExtractor' : '';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function Router() {
   return (
-    <Switch base={base}>
-      <Route path="/" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
-  return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <Switch>
+        <Route path={`${base}/`} component={Home} />
+        <Route path={`${base}/*`} component={NotFound} />
+      </Switch>
       <Toaster />
     </QueryClientProvider>
   );
 }
 
-export default App;
+export default Router;

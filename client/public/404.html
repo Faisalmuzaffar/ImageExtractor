@@ -4,16 +4,32 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    const path = window.location.pathname;
-    const base = '/ImageExtractor';
-    if (path.startsWith(base)) {
-      window.location.href = base + '/';
-    } else {
-      window.location.href = '/';
-    }
+    // Single Page Apps for GitHub Pages
+    // MIT License
+    // https://github.com/rafgraph/spa-github-pages
+    (function(l) {
+      if (l.search[1] === '/' ) {
+        var decoded = l.search.slice(1).split('&').map(function(s) { 
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    }(window.location))
   </script>
 </head>
 <body>
-  Redirecting...
+  <script>
+    const pathSegmentsToKeep = 1;
+    const path = window.location.pathname.split('/');
+    path.length = Math.min(path.length, pathSegmentsToKeep + 1);
+    window.location.replace(
+      window.location.origin +
+        path.join('/') +
+        '/?path=' +
+        window.location.pathname.slice(1)
+    );
+  </script>
 </body>
 </html>
