@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    const path = window.location.pathname;
+    const base = '/ImageExtractor';
+    if (path.startsWith(base)) {
+      window.location.href = base + '/';
+    } else {
+      window.location.href = '/';
+    }
+  </script>
+</head>
+<body>
+  Redirecting...
+</body>
+</html>

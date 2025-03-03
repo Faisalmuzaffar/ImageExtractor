@@ -5,9 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 
+// Get the base path for GitHub Pages
+const base = import.meta.env.MODE === 'production' ? '/ImageExtractor' : '';
+
 function Router() {
   return (
-    <Switch>
+    <Switch base={base}>
       <Route path="/" component={Home} />
       <Route component={NotFound} />
     </Switch>
