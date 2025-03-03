@@ -18,8 +18,8 @@ A React application that identifies and extracts design elements from uploaded i
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/image-template-extractor.git
-cd image-template-extractor
+git clone https://github.com/Faisalmuzaffar/ImageExtractor.git
+cd ImageExtractor
 ```
 
 2. Install dependencies:
