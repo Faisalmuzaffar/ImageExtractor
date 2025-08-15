@@ -12,7 +12,7 @@ function Router() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="app-container">
-        <Switch base={base}>
+        <Switch>
           <Route path="/" component={Home} />
           <Route component={NotFound} />
         </Switch>
