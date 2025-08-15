@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import UploadSection from '@/components/UploadSection';
 import ExtractedElements from '@/components/ExtractedElements';
 import type { ExtractedElement } from '@/lib/types';
@@ -10,64 +11,127 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedElements, setExtractedElements] = useState<ExtractedElement[]>([]);
+  const { toast } = useToast();
 
-  const handleImageUpload = useCallback((file: File) => {
+  const handleImageUpload = useCallback(async (file: File) => {
+    if (!file) {
+      setSelectedImage(null);
+      setExtractedElements([]);
+      return;
+    }
+
     setIsProcessing(true);
     const reader = new FileReader();
     
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       setSelectedImage(reader.result as string);
-      // Simulate AI processing
-      setTimeout(() => {
+      
+      try {
+        // Upload and process image via API
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('/api/process-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to process image');
+        }
+
+        const data = await response.json();
+        setExtractedElements(data.elements || []);
+        
+        toast({
+          title: "Image processed successfully!",
+          description: `Extracted ${data.elements?.length || 0} design elements.`,
+        });
+      } catch (error) {
+        console.error('Error processing image:', error);
+        toast({
+          title: "Processing failed",
+          description: "Failed to process the image. Please try again.",
+          variant: "destructive",
+        });
+        
+        // Fallback to mock data if API fails
         setExtractedElements([
           {
-            type: 'font',
-            name: 'Helvetica Neue',
-            details: '24px, Bold',
-            downloadUrl: '#'
-          },
-          {
             type: 'color',
-            name: 'Primary Blue',
-            details: '#2563eb',
-            value: '#2563eb',
-            downloadUrl: '#'
-          },
-          {
-            type: 'shape',
-            name: 'Logo Icon',
-            details: 'Vector Graphic',
-            downloadUrl: '#'
-          },
-          {
-            type: 'effect',
-            name: 'Drop Shadow',
-            details: '8px blur, 25% opacity',
-            downloadUrl: '#'
-          },
-          {
-            type: 'palette',
-            name: 'Color Scheme',
-            details: 'Brand Colors',
-            value: JSON.stringify([
-              { color: '#2563eb', name: 'Primary Blue' },
-              { color: '#1e40af', name: 'Dark Blue' },
-              { color: '#60a5fa', name: 'Light Blue' },
-              { color: '#f3f4f6', name: 'Background Gray' }
-            ]),
+            name: 'Error - Using Mock Data',
+            details: 'API processing failed',
             downloadUrl: '#'
           }
         ]);
+      } finally {
         setIsProcessing(false);
-      }, 2000);
+      }
     };
 
     reader.readAsDataURL(file);
   }, []);
 
   const handleExportTemplate = () => {
-    // In a real app, this would generate and download a complete design template
-    alert('Template exported!');
+    if (!extractedElements.length) {
+      toast({
+        title: "No elements to export",
+        description: "Please upload and process an image first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create a comprehensive template with all extracted elements
+      const template = {
+        name: 'Extracted Design Template',
+        createdAt: new Date().toISOString(),
+        sourceImage: selectedImage ? 'uploaded_image' : null,
+        elements: extractedElements,
+        summary: {
+          totalElements: extractedElements.length,
+          colors: extractedElements.filter(e => e.type === 'color').length,
+          fonts: extractedElements.filter(e => e.type === 'font').length,
+          effects: extractedElements.filter(e => e.type === 'effect').length,
+          palettes: extractedElements.filter(e => e.type === 'palette').length
+        },
+        usage: {
+          description: 'This template contains design elements extracted from your uploaded image.',
+          instructions: [
+            'Use the colors for maintaining brand consistency',
+            'Apply the fonts for typography matching',
+            'Implement effects for visual enhancements',
+            'Use palettes for complete color schemes'
+          ]
+        }
+      };
+
+      // Create and download the template file
+      const templateJson = JSON.stringify(template, null, 2);
+      const blob = new Blob([templateJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `design-template-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Template exported!",
+        description: "Your design template has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to export the template. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -83,7 +147,7 @@ export default function Home() {
             </div>
             <Button 
               onClick={handleExportTemplate}
-              disabled={!selectedImage}
+              disabled={!selectedImage || extractedElements.length === 0}
               className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
             >
               Export Template
